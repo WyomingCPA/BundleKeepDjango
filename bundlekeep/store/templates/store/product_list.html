@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Магазин</title>
+</head>
+
+<body>
+    <h1>Список товаров</h1>
+    <ul>
+        {% for product in products %}
+        <li>
+            <strong>{{ product.name }}</strong> — {{ product.price }} ₽
+            <p>Себестоимость: {{ product.cost }} ₽</p>
+            <p>Прибыль: {{ product.profit }} ₽ ({{ product.margin_percent }} %)</p>
+            <p>{{ product.description }}</p>
+        </li>
+        {% empty %}
+        <li>Нет товаров</li>
+        {% endfor %}
+    </ul>
+
+<h2>Комплекты</h2>
+<ul>
+    {% for bundle in bundles %}
+        <li>
+            <strong>{{ bundle.name }}</strong>  
+            (Скидка: {{ bundle.discount }}%)  
+            <p>Себестоимость: {{ bundle.total_cost }} ₽</p>
+            <p>Итого продажа: {{ bundle.total_price }} ₽</p>
+            <p>Прибыль: {{ bundle.profit }} ₽ ({{ bundle.margin_percent }} %)</p>
+
+            <p>Товары:</p>
+            <ul>
+                {% for product in bundle.products.all %}
+                    <li>{{ product.name }} — {{ product.price }} ₽ (себестоимость: {{ product.cost }} ₽)</li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% empty %}
+        <li>Нет комплектов</li>
+    {% endfor %}
+</ul>
+</body>
+
+</html>
