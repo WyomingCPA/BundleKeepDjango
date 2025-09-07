@@ -1,6 +1,20 @@
 from django.contrib import admin
-from .models import Product, Bundle, Category
+from .models import Product, Bundle, Category, Sale, SaleItem, BundleItem, SaleBundleItem, AvitoAd, City
 from django.utils.html import format_html
+
+class BundleItemInline(admin.TabularInline):
+    model = BundleItem
+    extra = 1
+
+
+class SaleItemInline(admin.TabularInline):
+    model = SaleItem
+    extra = 1
+
+@admin.register(Sale)
+class SaleAdmin(admin.ModelAdmin):
+    list_display = ("id", "date", "customer_name", "total_amount")
+    inlines = [SaleItemInline]
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -69,3 +83,29 @@ class BundleAdmin(admin.ModelAdmin):
     def margin_display(self, obj):
         return f"{obj.margin_percent()} %"
     margin_display.short_description = "Маржа %"
+    
+    
+class AvitoAdInline(admin.TabularInline):
+    model = AvitoAd
+    extra = 1
+    fields = ('title', 'price', 'competitor_price', 'published', 'avito_url')
+    readonly_fields = ('avito_url',)
+
+    def avito_url(self, obj):
+        if obj.avito_url:
+            return f'<a href="{obj.avito_url}" target="_blank">{obj.avito_url}</a>'
+        return "-"
+    avito_url.allow_tags = True
+    avito_url.short_description = "Avito ссылка"
+    
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+
+@admin.register(AvitoAd)
+class AvitoAdAdmin(admin.ModelAdmin):
+    list_display = ('title', 'price', 'competitor_price', 'published')
+    list_filter = ('published', 'cities')
+    search_fields = ('title', 'description')
+    filter_horizontal = ('cities',)
