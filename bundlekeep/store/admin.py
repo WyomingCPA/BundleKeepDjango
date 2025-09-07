@@ -1,6 +1,8 @@
 from django.contrib import admin
 from .models import Product, Bundle, Category, Sale, SaleItem, BundleItem, SaleBundleItem, AvitoAd, City
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+
 
 class BundleItemInline(admin.TabularInline):
     model = BundleItem
@@ -29,6 +31,8 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ("product_type", "category")  # фильтрация/сортировка в админке
     search_fields = ("name",)
     
+    readonly_fields = ("description_with_copy",)
+    
     def profit_display(self, obj):
         return f"{obj.profit()} ₽"
     profit_display.short_description = "Прибыль"
@@ -49,6 +53,8 @@ class ProductAdmin(admin.ModelAdmin):
         return "-"
     competitor_link.short_description = "Сайт конкурента"
     
+    
+    
     def colored_price_diff(self, obj):
         diff = obj.price_diff()
         if diff is None:
@@ -62,7 +68,17 @@ class ProductAdmin(admin.ModelAdmin):
         return format_html('<span style="color: {};">{} ₽</span>', color, diff)
 
     colored_price_diff.short_description = "Разница с конкурентом"
-
+    
+    def description_with_copy(self, obj):
+        if not obj.description:
+            return "-"
+        return mark_safe(f"""
+            <textarea id="desc_{obj.id}" style="width:100%; height:120px;">{obj.description}</textarea>
+            <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('desc_{obj.id}').value)">
+                📋 Скопировать
+            </button>
+        """)
+    description_with_copy.short_description = "Описание"
 
 @admin.register(Bundle)
 class BundleAdmin(admin.ModelAdmin):
